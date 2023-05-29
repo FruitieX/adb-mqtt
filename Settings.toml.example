@@ -1,0 +1,12 @@
+[mqtt]
+id = "adb-mqtt"
+host = "test.mosquitto.org"
+port = 1883
+
+# Topic that will be subscribed to. First plus sign will be replaced with device
+# id when publishing device updates.
+topic = "home/devices/adb/+"
+
+[device]
+ip = "1.2.3.4"
+name = "Android TV"
