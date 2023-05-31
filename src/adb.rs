@@ -16,12 +16,13 @@ where
         tokio::time::timeout(timeout, Command::new(cmd).args(args.clone()).output()).await??;
 
     output.status.success().then_some(()).ok_or(eyre!(
-        "Command '{} {}' failed, stderr: {}",
+        "Command '{} {}' failed, stdout: {} stderr: {}",
         cmd,
         args.into_iter()
             .map(|s| s.as_ref().to_string_lossy().to_string())
             .collect::<Vec<_>>()
             .join(" "),
+        String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     ))?;
 
