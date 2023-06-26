@@ -42,19 +42,22 @@ pub async fn init(mqtt_config: &MqttConfig) -> Result<MqttClient> {
     let (tx, rx) = tokio::sync::watch::channel(None);
 
     task::spawn(async move {
-        while let Ok(notification) = eventloop.poll().await {
+        loop {
+            let notification = eventloop.poll().await;
+
             let res = (|| async {
-                if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(msg)) = notification {
+                if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(msg)) = notification? {
                     let device: MqttDevice = serde_json::from_slice(&msg.payload)?;
                     tx.send(Some(device))?;
                 }
 
-                Ok::<(), Box<dyn std::error::Error>>(())
+                Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
             })()
             .await;
 
             if let Err(e) = res {
                 eprintln!("MQTT error: {:?}", e);
+                tokio::time::sleep(Duration::from_secs(1)).await;
             }
         }
     });
