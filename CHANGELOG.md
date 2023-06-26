@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/FruitieX/adb-mqtt/compare/v0.1.0...v0.1.1) (2023-06-26)
+
+
+### Bug Fixes
+
+* attempt reconnecting to mqtt after failure ([4cd0aa5](https://github.com/FruitieX/adb-mqtt/commit/4cd0aa5afe7993a6037d0add2b278e7298ae3525))
+
 ## 0.1.0 (2023-05-31)
 
 
