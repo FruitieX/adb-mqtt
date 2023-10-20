@@ -37,32 +37,42 @@ pub async fn init(mqtt_config: &MqttConfig) -> Result<MqttClient> {
     );
     options.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(options, 10);
-    client
-        .subscribe(format!("{}/set", mqtt_config.topic), QoS::AtMostOnce)
-        .await?;
 
     let (tx, rx) = tokio::sync::watch::channel(None);
 
-    task::spawn(async move {
-        loop {
-            let notification = eventloop.poll().await;
+    {
+        let client = client.clone();
+        let mqtt_config = mqtt_config.clone();
 
-            let res = (|| async {
-                if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(msg)) = notification? {
-                    let device: MqttDevice = serde_json::from_slice(&msg.payload)?;
-                    tx.send(Some(device))?;
+        task::spawn(async move {
+            loop {
+                let notification = eventloop.poll().await;
+
+                let res = (|| async {
+                    match notification? {
+                        rumqttc::Event::Incoming(rumqttc::Packet::ConnAck(_)) => {
+                            client
+                                .subscribe(format!("{}/set", mqtt_config.topic), QoS::AtMostOnce)
+                                .await?;
+                        }
+                        rumqttc::Event::Incoming(rumqttc::Packet::Publish(msg)) => {
+                            let device: MqttDevice = serde_json::from_slice(&msg.payload)?;
+                            tx.send(Some(device))?;
+                        }
+                        _ => {}
+                    }
+
+                    Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
+                })()
+                .await;
+
+                if let Err(e) = res {
+                    eprintln!("MQTT error: {:?}", e);
+                    tokio::time::sleep(Duration::from_secs(1)).await;
                 }
-
-                Ok::<(), Box<dyn std::error::Error + Send + Sync>>(())
-            })()
-            .await;
-
-            if let Err(e) = res {
-                eprintln!("MQTT error: {:?}", e);
-                tokio::time::sleep(Duration::from_secs(1)).await;
             }
-        }
-    });
+        });
+    }
 
     Ok(MqttClient {
         client,
