@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/FruitieX/adb-mqtt/compare/v0.1.1...v0.1.2) (2023-10-20)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([ebee2e4](https://github.com/FruitieX/adb-mqtt/commit/ebee2e47b1044e68613a4b78314dedad2559a343))
+* MQTT client re-subscribes on reconnect ([faba904](https://github.com/FruitieX/adb-mqtt/commit/faba90462cff3fd7828b0df371ef587ffe279286))
+
 ## [0.1.1](https://github.com/FruitieX/adb-mqtt/compare/v0.1.0...v0.1.1) (2023-06-26)
 
 

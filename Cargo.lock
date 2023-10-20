@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "adb-mqtt"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "color-eyre",
  "config",
