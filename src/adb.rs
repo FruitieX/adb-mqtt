@@ -16,16 +16,21 @@ where
     let output =
         tokio::time::timeout(timeout, Command::new(cmd).args(args.clone()).output()).await??;
 
-    let _result = output.status.success().then_some(()).ok_or(eyre!(
-        "Command '{} {}' failed, stdout: {} stderr: {}",
-        cmd,
-        args.into_iter()
-            .map(|s| s.as_ref().to_string_lossy().to_string())
-            .collect::<Vec<_>>()
-            .join(" "),
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr)
-    )).map_err(|e| e.to_string());
+    let _result = output
+        .status
+        .success()
+        .then_some(())
+        .ok_or(eyre!(
+            "Command '{} {}' failed, stdout: {} stderr: {}",
+            cmd,
+            args.into_iter()
+                .map(|s| s.as_ref().to_string_lossy().to_string())
+                .collect::<Vec<_>>()
+                .join(" "),
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        ))
+        .map_err(|e| e.to_string());
 
     let stdout = String::from_utf8_lossy(&output.stdout).to_string();
     Ok(stdout)
@@ -35,7 +40,7 @@ pub async fn connect(addr: &str) -> Result<()> {
     // Defaults to port 5555 if not specified
     let (ip, port) = match addr.split_once(':') {
         Some((ip, port)) => (ip, port.parse::<u16>().unwrap_or(5555)),
-        None => (addr, 5555)
+        None => (addr, 5555),
     };
 
     let address = format!("{}:{}", ip, port);
@@ -108,8 +113,11 @@ pub fn init(mut mqtt_client: MqttClient, adb_config: AdbConfig) {
                 power: Some(is_on),
             };
 
-            let topic = mqtt_client.topic.clone().replace('+', device.clone().id.as_str());
-            
+            let topic = mqtt_client
+                .topic
+                .clone()
+                .replace('+', device.clone().id.as_str());
+
             mqtt_client
                 .client
                 .publish(
@@ -138,7 +146,6 @@ pub fn init(mut mqtt_client: MqttClient, adb_config: AdbConfig) {
                 power: Some(false), ..
             }) = device
             {
-                // connect(&adb_config.ip).await.unwrap();
                 sleep_if_awake(&adb_config.ip).await
             } else {
                 wake_if_asleep(&adb_config.ip).await
