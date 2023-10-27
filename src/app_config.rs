@@ -10,10 +10,11 @@ pub struct MqttConfig {
     pub topic: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct AdbConfig {
     pub ip: String,
     pub name: String,
+    pub poll_rate: Option<u64>,
 }
 
 #[derive(Deserialize, Debug)]
