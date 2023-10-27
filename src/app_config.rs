@@ -2,7 +2,7 @@ use color_eyre::Result;
 use eyre::{eyre, WrapErr};
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct MqttConfig {
     pub id: String,
     pub host: String,
