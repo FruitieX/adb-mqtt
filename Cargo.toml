@@ -11,6 +11,6 @@ config = "=0.15.4"
 eyre = "=0.6.12"
 rand = "=0.8.5"
 rumqttc = "=0.24.0"
-serde = "=1.0.216"
+serde = "=1.0.217"
 serde_json = "=1.0.134"
 tokio = { version = "=1.42.0", features = ["macros", "rt", "rt-multi-thread", "time", "process", "sync", "signal"] }
