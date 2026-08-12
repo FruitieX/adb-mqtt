@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 color-eyre = "=0.6.5"
 config = "=0.15.13"
-eyre = "=0.6.12"
+eyre = "=0.6.14"
 rand = "=0.8.5"
 rumqttc = "=0.25.1"
 serde = "=1.0.229"
