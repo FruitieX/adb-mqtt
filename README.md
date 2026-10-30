@@ -23,3 +23,7 @@ MQTT messages use the following JSON format:
   "power": false,
 }
 ```
+
+## License
+
+MIT, see [LICENSE](LICENSE).
