@@ -37,15 +37,39 @@ pub fn read_config() -> Result<(MqttConfig, AdbConfig)> {
         std::fs::copy(sample_path, path).unwrap();
     }
 
-    let builder = builder.add_source(config::File::with_name("Settings"));
-    let settings = builder.build()?;
-
-    let config: Config = settings.try_deserialize().wrap_err_with(|| {
-        eyre!("Failed to deserialize config, compare your config file to Settings.toml.example!")
-    })?;
+    let config = parse_config(builder.add_source(config::File::with_name("Settings")))?;
 
     let mqtt_config = config.mqtt;
     let adb_config = config.device;
 
     Ok((mqtt_config, adb_config))
+}
+
+fn parse_config(builder: config::ConfigBuilder<config::builder::DefaultState>) -> Result<Config> {
+    let settings = builder.build()?;
+
+    settings.try_deserialize().wrap_err_with(|| {
+        eyre!("Failed to deserialize config, compare your config file to Settings.toml.example!")
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_example_config() {
+        let builder = config::Config::builder().add_source(config::File::from_str(
+            include_str!("../Settings.toml.example"),
+            config::FileFormat::Toml,
+        ));
+
+        let config = parse_config(builder).unwrap();
+
+        assert_eq!(config.mqtt.id, "adb-mqtt");
+        assert_eq!(config.mqtt.port, 1883);
+        assert_eq!(config.mqtt.topic, "home/devices/adb/+");
+        assert_eq!(config.device.ip, "1.2.3.4");
+        assert_eq!(config.device.poll_rate, None);
+    }
 }

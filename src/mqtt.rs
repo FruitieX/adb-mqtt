@@ -86,3 +86,43 @@ pub async fn init(mqtt_config: &MqttConfig) -> Result<MqttClient> {
     })
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn client_id_has_random_suffix() {
+        let a = client_id("adb-mqtt");
+        let b = client_id("adb-mqtt");
+
+        assert!(a.starts_with("adb-mqtt-"));
+        assert_eq!(a.len(), "adb-mqtt-".len() + 8);
+        assert!(a["adb-mqtt-".len()..]
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric()));
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn device_json_round_trips() {
+        let device = MqttDevice {
+            id: "1.2.3.4".to_string(),
+            name: Some("Android TV".to_string()),
+            power: Some(true),
+        };
+
+        let json = serde_json::to_vec(&device).unwrap();
+        let decoded: MqttDevice = serde_json::from_slice(&json).unwrap();
+
+        assert_eq!(decoded, device);
+    }
+
+    #[test]
+    fn decodes_set_message() {
+        let device: MqttDevice =
+            serde_json::from_str(r#"{"id": "1.2.3.4", "power": false}"#).unwrap();
+
+        assert_eq!(device.power, Some(false));
+        assert_eq!(device.name, None);
+    }
+}
