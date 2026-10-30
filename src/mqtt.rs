@@ -41,6 +41,12 @@ pub async fn init(mqtt_config: &MqttConfig) -> Result<MqttClient> {
         mqtt_config.port,
     );
     options.set_keep_alive(Duration::from_secs(5));
+    if let Some(username) = &mqtt_config.username {
+        options.set_credentials(
+            username.clone(),
+            mqtt_config.password.clone().unwrap_or_default(),
+        );
+    }
     let (client, mut eventloop) = AsyncClient::new(options, 10);
 
     let (tx, rx) = tokio::sync::watch::channel(None);
